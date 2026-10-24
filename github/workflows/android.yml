@@ -1,0 +1,23 @@
+name: Android APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Generate Android project
+        run: flutter create --project-name emoji_sarj --platforms android .
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Build debug APK
+        run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: emoji-sarj-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
