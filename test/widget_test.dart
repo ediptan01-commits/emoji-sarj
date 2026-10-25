@@ -71,8 +71,13 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(const EmojiSarjApp());
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('Tam ekranı dene →'), 250);
-    await tester.tap(find.text('Tam ekranı dene →'));
+    final preview = find.text('Tam ekranı dene →').hitTestable();
+    for (var i = 0; i < 20 && preview.evaluate().isEmpty; i++) {
+      await tester.drag(find.byType(ListView), const Offset(0, -250));
+      await tester.pumpAndSettle();
+    }
+    expect(preview, findsOneWidget);
+    await tester.tap(preview);
     await tester.pumpAndSettle();
     expect(calls, contains('preview'));
     expect(tester.takeException(), isNull);
