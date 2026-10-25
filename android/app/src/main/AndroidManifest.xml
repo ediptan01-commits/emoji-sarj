@@ -20,13 +20,17 @@
                 android:value="User-enabled charging character overlay; monitors cable and screen state until explicitly stopped via the persistent notification or app." />
         </service>
         <service android:name=".PompiDreamService" android:exported="true" android:label="Pompi şarj sahnesi"
-            android:permission="android.permission.BIND_DREAM_SERVICE">
+            android:icon="@drawable/pompi_icon" android:permission="android.permission.BIND_DREAM_SERVICE">
             <intent-filter>
                 <action android:name="android.service.dreams.DreamService" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <meta-data android:name="android.service.dream" android:resource="@xml/pompi_dream" />
         </service>
         <meta-data android:name="flutterEmbedding" android:value="2" />
     </application>
-    <queries><intent><action android:name="android.intent.action.PROCESS_TEXT" /><data android:mimeType="text/plain" /></intent></queries>
+    <queries>
+        <intent><action android:name="android.intent.action.PROCESS_TEXT" /><data android:mimeType="text/plain" /></intent>
+        <intent><action android:name="android.settings.DREAM_SETTINGS" /></intent>
+    </queries>
 </manifest>

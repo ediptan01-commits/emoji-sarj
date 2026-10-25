@@ -32,7 +32,9 @@ class ChargingPage extends StatefulWidget {
 class _ChargingPageState extends State<ChargingPage>
     with WidgetsBindingObserver {
   bool enabled = false, allowed = false, plugged = false;
-  double right = 8, top = 0, size = 48;
+  double right = 22, top = 0, size = 48;
+  bool positionEditing = false;
+  bool? dreamEnabled, dreamSelected;
   String? message;
   Timer? statusTimer;
 
@@ -64,9 +66,13 @@ class _ChargingPageState extends State<ChargingPage>
         enabled = data['enabled'] == true;
         allowed = data['allowed'] == true;
         plugged = data['plugged'] == true;
-        right = (data['right'] as num).toDouble();
-        top = (data['top'] as num).toDouble();
-        size = (data['size'] as num).toDouble();
+        if (!positionEditing) {
+          right = (data['right'] as num).toDouble();
+          top = (data['top'] as num).toDouble();
+          size = (data['size'] as num).toDouble();
+        }
+        dreamEnabled = data['dreamEnabled'] as bool?;
+        dreamSelected = data['dreamSelected'] as bool?;
       });
     } on PlatformException catch (e) {
       if (mounted) setState(() => message = e.message);
@@ -85,11 +91,24 @@ class _ChargingPageState extends State<ChargingPage>
       await refresh();
     } on PlatformException catch (e) {
       if (mounted) {
-        setState(() => message = e.message ?? 'İşlem tamamlanamadı.');
+        final text = e.message ?? 'İşlem tamamlanamadı.';
+        setState(() => message = text);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(text)));
       }
     } on MissingPluginException {
       if (mounted) setState(() => message = 'Android telefonda deneyin.');
     }
+  }
+
+  Future<void> savePosition() async {
+    await command('position', {
+      'right': right.round(),
+      'top': top.round(),
+      'size': size.round(),
+    });
+    if (mounted) setState(() => positionEditing = false);
   }
 
   @override
@@ -210,12 +229,12 @@ class _ChargingPageState extends State<ChargingPage>
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'İkinci pil yok. Yalnızca karakter ve pompası. Android sistem çubuğuna çizim izni vermez; karakter sağ üstte, çubuğun hemen altında durur. Konumu telefonuna göre ayarla.',
+                  'İkinci pil yok. Hortum üst kenara, telefonun kendi pilinin altına uzanır. Sağdan boşlukla pilin altına hizala. Üst hizalamayı azaltarak karakteri yukarı taşıyabilirsin; sistem çubuğunun arkasına geçen kısım telefona göre gizlenebilir.',
                   style: TextStyle(color: Colors.white70, height: 1.5),
                 ),
                 for (final item in [
                   ('Sağdan boşluk', right, 0.0, 160.0, 'right'),
-                  ('Üstten ek boşluk', top, 0.0, 200.0, 'top'),
+                  ('Üst hizalama', top, -48.0, 200.0, 'top'),
                   ('Karakter boyutu', size, 32.0, 80.0, 'size'),
                 ]) ...[
                   const SizedBox(height: 12),
@@ -224,16 +243,14 @@ class _ChargingPageState extends State<ChargingPage>
                     value: item.$2,
                     min: item.$3,
                     max: item.$4,
+                    onChangeStart: (_) =>
+                        setState(() => positionEditing = true),
                     onChanged: (v) => setState(() {
                       if (item.$5 == 'right') right = v;
                       if (item.$5 == 'top') top = v;
                       if (item.$5 == 'size') size = v;
                     }),
-                    onChangeEnd: (_) => command('position', {
-                      'right': right.round(),
-                      'top': top.round(),
-                      'size': size.round(),
-                    }),
+                    onChangeEnd: (_) => savePosition(),
                   ),
                 ],
                 const Text(
@@ -262,6 +279,30 @@ class _ChargingPageState extends State<ChargingPage>
                   style: TextStyle(color: Colors.white70, height: 1.5),
                 ),
                 const SizedBox(height: 14),
+                FilledButton.icon(
+                  onPressed: () => command('chargingScreen'),
+                  icon: const Icon(Icons.fullscreen),
+                  label: const Text('Şarj ekranını şimdi aç'),
+                ),
+                const Text(
+                  'Gerçek pil seviyesiyle hemen açılır. Kablo çıkarılınca kapanır; çıkmak için ekrana dokun. Açık kaldığı sürece ekranı düşük parlaklıkta açık tutar.',
+                  style: TextStyle(color: Colors.white70, height: 1.5),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  dreamEnabled == false
+                      ? 'Android ekran koruyucusu kapalı. Ayardan açıp Pompi şarj sahnesini seç.'
+                      : dreamSelected == false
+                      ? 'Android ayarında Pompi seçili değil. Önce Pompi şarj sahnesini seç.'
+                      : dreamEnabled == true && dreamSelected == true
+                      ? 'Android ayarında Pompi seçili ve ekran koruyucu açık.'
+                      : 'Telefon ekran koruyucu durumunu bildirmiyor. Ayarı açıp Pompi seçimini kontrol et.',
+                  style: const TextStyle(
+                    color: Colors.amberAccent,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: () => command('dreamSettings'),
                   icon: const Icon(Icons.bedtime_outlined),
@@ -272,7 +313,7 @@ class _ChargingPageState extends State<ChargingPage>
                   child: const Text('Tam ekranı dene →'),
                 ),
                 const Text(
-                  'Her üretici desteklemez. Güvenli kilit ekranının yerine geçmez; kapalı ekranı zorla uyandırmaz. Önizleme temsili, ekran koruyucu gerçek pil verisini kullanır.',
+                  'Otomatik ekran koruyucu için Pompi + şarj sırasında seç; güç tuşuyla kapatmak yerine ekran zaman aşımını bekle. Açma düğmesi çalışmıyorsa yukarıdaki Şarj ekranını şimdi aç düğmesini kullan. Güvenli kilit ekranının yerine geçmez ve kapalı ekranı zorla uyandırmaz. Tam ekranı dene seçeneği temsili veridir.',
                   style: TextStyle(
                     color: Colors.white54,
                     height: 1.5,

@@ -23,6 +23,13 @@ class OverlayService : Service() {
     override fun onCreate() {
         super.onCreate()
         wm = getSystemService(WindowManager::class.java)
+        // Migrate the previous default, retaining positions explicitly customized by users.
+        val prefs = getSharedPreferences("pompi", MODE_PRIVATE)
+        if (!prefs.getBoolean("placementV2", false)) {
+            val edit = prefs.edit().putBoolean("placementV2", true)
+            if (prefs.getInt("right", 8) == 8) edit.putInt("right", 22)
+            edit.apply()
+        }
         getSystemService(NotificationManager::class.java).createNotificationChannel(
             NotificationChannel("pompi", "Pompi şarj arkadaşı", NotificationManager.IMPORTANCE_LOW)
         )
@@ -67,11 +74,19 @@ class OverlayService : Service() {
         val side = dp(prefs.getInt("size", 48))
         val params = WindowManager.LayoutParams(side, side,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT).apply {
             gravity = Gravity.TOP or Gravity.RIGHT
-            x = dp(prefs.getInt("right", 8)); y = dp(prefs.getInt("top", 0))
-            // Do not use LAYOUT_IN_SCREEN: stay inside the system's safe app area.
+            x = dp(prefs.getInt("right", 22))
+            // Use screen coordinates and add the status-bar inset exactly once.
+            val inset = if (Build.VERSION.SDK_INT >= 30) {
+                setFitInsetsTypes(0)
+                wm.maximumWindowMetrics.windowInsets.getInsetsIgnoringVisibility(WindowInsets.Type.statusBars() or WindowInsets.Type.displayCutout()).top
+            } else {
+                val resource = resources.getIdentifier("status_bar_height", "dimen", "android")
+                if (resource > 0) resources.getDimensionPixelSize(resource) else dp(24)
+            }
+            y = (inset + dp(prefs.getInt("top", 0))).coerceAtLeast(0)
             alpha = 0.8f
         }
         try {

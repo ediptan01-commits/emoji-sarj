@@ -56,3 +56,12 @@ Flutter widget testleri izin/başlat/durdur akışını, ikinci pil bulunmaması
 
 Kaynaklar: [Android overlay](https://developer.android.com/reference/android/view/WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY), [DreamService](https://developer.android.com/reference/android/service/dreams/DreamService), [Ön plan hizmeti türleri](https://developer.android.com/develop/background-work/services/fgs/service-types).
 
+
+## 1.2.0 — telefondan gelen geri bildirim
+
+- Küçük kaplama ekran koordinatlarına taşındı; status bar/çentik boşluğu yalnızca bir kez eklenir. Önceki 8 dp sağ boşluk varsayılanı, pilin altına daha yakın olan 22 dp değerine taşınır. Özel konumlar korunur. Üst hizalama artık -48..200 dp aralığındadır; çubuğun arkasına giren bölüm cihaz tarafından gizlenebilir. Yeni sürümden sonra gerekirse Üst hizalamayı azaltıp Sağdan boşlukla pilin altına hizalayın.
+- Hortum, her pozun uç noktasından çizilen ek bağlantıyla devam eder. Büyük sahnede bataryanın alt solundaki yuvaya bağlanır. Küçük görünümde telefonun gerçek pilinin altına hizalanabilen üst kenara uzanır. Sistem status bar simgesinin içine çizim yapılmaz; ikinci pil oluşturulmaz.
+- Ekran koruyucusuna Android dream metadata, ikon ve ayar bağlantısı eklendi. İlk pil bildirimi henüz yokken hizmetin yanlışlıkla kapanması önlendi. Android'in bildirdiği açık/kapalı ve Pompi seçimi uygulamada gösterilir; okunamayan durumlar bilinmiyor olarak belirtilir.
+- **Şarj ekranını şimdi aç**: kullanıcı dokunarak açar, gerçek pil yüzdesini izler, düşük parlaklıkla ekranı açık tutar; kablo çıkarılınca veya ekrana dokunulunca kapanır. Bu, Android ekran koruyucusu açma düğmesinin çalışmadığı cihazlar için elle kullanılan alternatiftir. Kendi kendine kilit üstüne çıkmaz; Android'in otomatik ekran koruyucusunu zorla etkinleştirmez.
+- Sistem ekran koruyucusu için ayardan Pompi seçimi ve şarj sırasında çalıştırma gerekir. Güç tuşuyla ekranı kapatmak yerine ekran zaman aşımını bekleyin. Sistem ayarındaki işlevsiz açma düğmesinin kesin nedeni cihaz modeli ve günlükleri olmadan doğrulanmadı.
+- İşlem hataları artık uzun sayfanın sonunda saklı kalmak yerine görünen bir mesajla da bildirilir. Konum ayarı sürüklenirken periyodik durum yenilemesi ayarı geri atmaz.

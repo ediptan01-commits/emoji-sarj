@@ -8,8 +8,8 @@ import kotlin.math.*
 
 /** Shared sprite animation for the overlay, preview and Android screen saver. */
 class PompiView(context: Context, private val large: Boolean) : View(context) {
-    var level = 64
-    var plugged = true
+    var level = 0
+    var plugged = false
     var preview = false
     var animating = true
         set(value) { field = value; if (value) postInvalidateOnAnimation() }
@@ -17,6 +17,17 @@ class PompiView(context: Context, private val large: Boolean) : View(context) {
     private val born = SystemClock.uptimeMillis()
     private val atlas = BitmapFactory.decodeStream(context.assets.open("flutter_assets/assets/pompi-atlas.png"))
     private val green = Color.rgb(57, 255, 55)
+    private val hose = Path()
+    private fun drawHose(c: Canvas, from: HoseGeometry.Point, targetX: Float, targetY: Float, thickness: Float) {
+        hose.reset()
+        hose.moveTo(from.x, from.y)
+        hose.cubicTo(from.x - thickness, from.y - thickness * 5, targetX, targetY + thickness * 8, targetX, targetY)
+        p.shader = null; p.style = Paint.Style.STROKE; p.strokeCap = Paint.Cap.ROUND
+        p.color = Color.rgb(65, 14, 18); p.strokeWidth = thickness * 1.6f; c.drawPath(hose, p)
+        p.color = Color.rgb(255, 48, 33); p.strokeWidth = thickness; c.drawPath(hose, p)
+        p.color = Color.rgb(255, 174, 118); p.strokeWidth = thickness * .25f; c.drawPath(hose, p)
+        p.style = Paint.Style.FILL
+    }
     private fun text(c: Canvas, value: String, x: Float, y: Float, size: Float, color: Int) {
         p.shader = null; p.color = color; p.style = Paint.Style.FILL; p.textSize = size
         p.typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL); p.textAlign = Paint.Align.CENTER
@@ -52,13 +63,20 @@ class PompiView(context: Context, private val large: Boolean) : View(context) {
             // A gently moving neon floor, without replacing any system lock controls.
             p.strokeWidth = 1f; p.color = Color.argb(65, 73, 158, 255)
             for (i in 0..5) c.drawLine(16f, 365f + i * 7f, 304f, 365f + i * 7f, p)
-            sprite(c, RectF(0f, 160f + bob, 219f, 379f + bob), frame)
             drawBattery(c, 226f, 202f, 66f, 166f, t)
+            // Join the actual sprite hose mouth to a visible socket on the battery.
+            val mouth = HoseGeometry.mouth(frame, 0f, 160f + bob, 219f, 219f)
+            drawHose(c, mouth, 228f, 352f, 6f)
+            p.color = Color.LTGRAY; c.drawRoundRect(222f, 345f, 235f, 359f, 3f, 3f, p)
+            p.color = Color.rgb(255, 48, 33); c.drawCircle(227f, 352f, 3f, p)
+            sprite(c, RectF(0f, 160f + bob, 219f, 379f + bob), frame)
             text(c, "%$level", 160f, 427f, 37f, if (level < 20) Color.rgb(255, 99, 72) else green)
             text(c, if (preview) "Temsili pil seviyesi · Dokun ve geri dön" else "Pompi şarj arkadaşın", 160f, 471f, 12f, Color.LTGRAY)
             c.restore()
         } else {
-            // Absolutely no battery gauge in the small overlay.
+            // A hose reaches the top boundary, just below the real system battery.
+            // Android owns the status bar; we neither redraw nor replace its icon.
+            drawHose(c, HoseGeometry.mouth(frame, 0f, bob, width.toFloat(), height.toFloat()), width * .96f, 0f, width * .035f)
             sprite(c, RectF(0f, bob, width.toFloat(), height.toFloat() + bob), frame)
         }
         if (animating && isShown && windowVisibility == VISIBLE) postInvalidateDelayed(33)

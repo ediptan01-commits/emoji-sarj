@@ -11,6 +11,7 @@ class PompiDreamService : DreamService() {
     private var registered = false
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent == null) return
             val state = ChargingState.from(intent)
             character.level = state.level; character.plugged = state.plugged
             if (!state.plugged) finish()
@@ -30,10 +31,13 @@ class PompiDreamService : DreamService() {
         val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
         val sticky = if (Build.VERSION.SDK_INT >= 33) registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED) else registerReceiver(receiver, filter)
         registered = true
-        val state = ChargingState.from(sticky)
-        character.level = state.level; character.plugged = state.plugged
-        character.animating = state.plugged
-        if (!state.plugged) finish()
+        // A missing sticky Intent is not evidence of unplugging: wait for real data.
+        if (sticky != null) {
+            val state = ChargingState.from(sticky)
+            character.level = state.level; character.plugged = state.plugged
+            if (!state.plugged) finish()
+        }
+        character.animating = true
         refreshOverlay()
     }
     override fun onDreamingStopped() {
