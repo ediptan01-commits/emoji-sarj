@@ -65,3 +65,9 @@ Kaynaklar: [Android overlay](https://developer.android.com/reference/android/vie
 - **Şarj ekranını şimdi aç**: kullanıcı dokunarak açar, gerçek pil yüzdesini izler, düşük parlaklıkla ekranı açık tutar; kablo çıkarılınca veya ekrana dokunulunca kapanır. Bu, Android ekran koruyucusu açma düğmesinin çalışmadığı cihazlar için elle kullanılan alternatiftir. Kendi kendine kilit üstüne çıkmaz; Android'in otomatik ekran koruyucusunu zorla etkinleştirmez.
 - Sistem ekran koruyucusu için ayardan Pompi seçimi ve şarj sırasında çalıştırma gerekir. Güç tuşuyla ekranı kapatmak yerine ekran zaman aşımını bekleyin. Sistem ayarındaki işlevsiz açma düğmesinin kesin nedeni cihaz modeli ve günlükleri olmadan doğrulanmadı.
 - İşlem hataları artık uzun sayfanın sonunda saklı kalmak yerine görünen bir mesajla da bildirilir. Konum ayarı sürüklenirken periyodik durum yenilemesi ayarı geri atmaz.
+
+## HONOR Magic7 Pro / MagicOS 10
+
+Kullanıcının bildirdiği sistem ekran koruyucu düğmesi fotoğraf/albüm ekranına aittir; açılmamasının nedeni cihaz günlüğü olmadan doğrulanmadı. APK bu sistem düğmesini zorla açamaz. Elle kullanılan **Şarj ekranını şimdi aç** düğmesi 1.2.0'da mevcuttur.
+
+İstenen yerel kilit ekranı şarj efekti için APK'dan ayrı, yalnızca şarj modülünü içeren deneysel HONOR tema üretimi eklendi. Resmi alfa video dönüştürücüsüyle 180 kare/6 saniyelik video üretilir; gerçek yüzde sistem alanı olarak kalır. Bu sürekli ekran koruyucu değildir ve telefonda çalıştığı henüz doğrulanmadı. Kaynak, üretim, kontroller ve resmi editörle deneme adımları: [honor-theme/README.md](honor-theme/README.md).
