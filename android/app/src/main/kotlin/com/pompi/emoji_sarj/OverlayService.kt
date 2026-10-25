@@ -78,6 +78,9 @@ class OverlayService : Service() {
             PixelFormat.TRANSLUCENT).apply {
             gravity = Gravity.TOP or Gravity.RIGHT
             x = dp(prefs.getInt("right", 22))
+            // Do not let cutout fitting add a second top offset on notched phones.
+            // The safe top inset is applied explicitly below instead.
+            if (Build.VERSION.SDK_INT >= 28) layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             // Use screen coordinates and add the status-bar inset exactly once.
             val inset = if (Build.VERSION.SDK_INT >= 30) {
                 setFitInsetsTypes(0)
