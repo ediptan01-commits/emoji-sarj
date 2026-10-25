@@ -1,0 +1,7 @@
+* text=auto
+/android/gradlew text eol=lf
+*.yaml text eol=lf
+*.dart text eol=lf
+*.kt text eol=lf
+*.png binary
+*.jar binary

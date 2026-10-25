@@ -2,22 +2,45 @@ name: Android APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, 'pompi/**']
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.35.7'
           channel: stable
-      - name: Generate Android project
-        run: flutter create --project-name emoji_sarj --platforms android .
-      - name: Install dependencies
-        run: flutter pub get
+          cache: true
+      - name: Install locked dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+      - name: Analyze Flutter
+        run: flutter analyze
+      - name: Test Flutter
+        run: flutter test
       - name: Build debug APK
         run: flutter build apk --debug
+      - name: Android lint and native tests
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew lintDebug testDebugUnitTest
       - uses: actions/upload-artifact@v4
         with:
           name: emoji-sarj-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error
