@@ -13,28 +13,29 @@ void main() {
     calls.clear();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(bridge, (call) async {
-      calls.add(call.method);
-      if (call.method == 'start') enabled = true;
-      if (call.method == 'stop') enabled = false;
-      if (call.method == 'status') {
-        return {
-          'enabled': enabled,
-          'allowed': allowed,
-          'plugged': true,
-          'right': 8,
-          'top': 0,
-          'size': 48
-        };
-      }
-      return null;
-    });
+          calls.add(call.method);
+          if (call.method == 'start') enabled = true;
+          if (call.method == 'stop') enabled = false;
+          if (call.method == 'status') {
+            return {
+              'enabled': enabled,
+              'allowed': allowed,
+              'plugged': true,
+              'right': 8,
+              'top': 0,
+              'size': 48,
+            };
+          }
+          return null;
+        });
   });
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(bridge, null);
   });
-  testWidgets('starts and stops explicitly, no duplicate battery gauge',
-      (tester) async {
+  testWidgets('starts and stops explicitly, no duplicate battery gauge', (
+    tester,
+  ) async {
     await tester.pumpWidget(const EmojiSarjApp());
     await tester.pumpAndSettle();
     expect(find.byType(LinearProgressIndicator), findsNothing);
@@ -48,8 +49,9 @@ void main() {
     expect(calls, contains('stop'));
     await tester.pumpWidget(const SizedBox());
   });
-  testWidgets('permission is requested before starting overlay',
-      (tester) async {
+  testWidgets('permission is requested before starting overlay', (
+    tester,
+  ) async {
     allowed = false;
     await tester.pumpWidget(const EmojiSarjApp());
     await tester.pumpAndSettle();
@@ -60,8 +62,9 @@ void main() {
     expect(calls, isNot(contains('start')));
     await tester.pumpWidget(const SizedBox());
   });
-  testWidgets('small screen scrolls to full screen actions without overflow',
-      (tester) async {
+  testWidgets('small screen scrolls to full screen actions without overflow', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(320, 568);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);

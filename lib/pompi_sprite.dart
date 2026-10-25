@@ -8,19 +8,22 @@ class PompiSprite extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-        width: size,
-        height: size,
-        child: ClipRect(
-          child: OverflowBox(
-            alignment: Alignment.topLeft,
-            maxWidth: size * 2,
-            maxHeight: size * 2,
-            child: Transform.translate(
-              offset: Offset(-(frame % 2) * size, -(frame ~/ 2) * size),
-              child: Image.asset('assets/pompi-atlas.png',
-                  width: size * 2, height: size * 2),
-            ),
+    width: size,
+    height: size,
+    child: ClipRect(
+      child: OverflowBox(
+        alignment: Alignment.topLeft,
+        maxWidth: size * 2,
+        maxHeight: size * 2,
+        child: Transform.translate(
+          offset: Offset(-(frame % 2) * size, -(frame ~/ 2) * size),
+          child: Image.asset(
+            'assets/pompi-atlas.png',
+            width: size * 2,
+            height: size * 2,
           ),
         ),
-      );
+      ),
+    ),
+  );
 }

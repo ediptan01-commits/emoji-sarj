@@ -43,6 +43,13 @@ class PompiDreamService : DreamService() {
         refreshOverlay()
         super.onDreamingStopped()
     }
+    override fun onDetachedFromWindow() {
+        visible = false
+        character.animating = false
+        if (registered) { unregisterReceiver(receiver); registered = false }
+        refreshOverlay()
+        super.onDetachedFromWindow()
+    }
     private fun refreshOverlay() {
         if (OverlayService.running) startService(Intent(this, OverlayService::class.java))
     }
