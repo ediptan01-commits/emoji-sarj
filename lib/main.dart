@@ -117,9 +117,13 @@ class _ChargingPageState extends State<ChargingPage>
             children: [
               Icon(Icons.bolt, color: Colors.yellowAccent, size: 30),
               SizedBox(width: 8),
-              Text(
-                'Emoji Şarj',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+              Expanded(
+                child: Text(
+                  'Emoji Şarj',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ),
               ),
             ],
           ),
