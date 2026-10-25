@@ -113,13 +113,15 @@ class _ChargingPageState extends State<ChargingPage>
       child: ListView(
         padding: const EdgeInsets.all(24),
         children: [
-          const Text(
-            '⚡ EMOJİ ŞARJ',
-            style: TextStyle(
-              color: Colors.white,
-              letterSpacing: 1,
-              fontSize: 24,
-            ),
+          const Row(
+            children: [
+              Icon(Icons.bolt, color: Colors.yellowAccent, size: 30),
+              SizedBox(width: 8),
+              Text(
+                'Emoji Şarj',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+            ],
           ),
           const SizedBox(height: 18),
           const Text(
